@@ -1,12 +1,15 @@
 package main
 
 import (
+	pg "github.com/habx/pg-commands"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/Piitschy/postgress-dump-tool/server/docs"
 )
+
+var DB *pg.Postgres
 
 // @title Echo Swagger Example API
 // @version 1.0
@@ -26,7 +29,7 @@ import (
 func main() {
 	// Get env variables
 
-	//db := NewPostgres()
+	DB = NewPostgres()
 
 	// Echo instance
 	e := echo.New()

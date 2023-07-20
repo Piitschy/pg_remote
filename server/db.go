@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	pg "github.com/habx/pg-commands"
 )
+
+type path string
 
 func NewPostgres() *pg.Postgres {
 	host := os.Getenv("DB_HOST")
@@ -36,11 +39,16 @@ func NewPostgres() *pg.Postgres {
 	}
 }
 
-func Dump(db *pg.Postgres) {
-	dump, err := pg.NewDump(db)
+func Dump() pg.Result {
+	now := time.Now().Format("2006-01-02T15:04:05")
+	filename := "dump_" + now + ".sql"
+
+	dump, err := pg.NewDump(DB)
 	if err != nil {
 		panic(err)
 	}
+
+	dump.SetFileName(filename)
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: false})
 	if dumpExec.Error != nil {
 		fmt.Println(dumpExec.Error.Err)
@@ -48,10 +56,11 @@ func Dump(db *pg.Postgres) {
 	}
 	fmt.Println("Dump success")
 	fmt.Println(dumpExec.Output)
+	return dumpExec
 }
 
-func Restore(db *pg.Postgres, dumpExec pg.Result) {
-	restore, err := pg.NewRestore(db)
+func Restore(dumpExec pg.Result) {
+	restore, err := pg.NewRestore(DB)
 	if err != nil {
 		panic(err)
 	}

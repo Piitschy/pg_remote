@@ -15,6 +15,6 @@ COPY ./static ./static
 
 RUN go build -o /bin
 
-EXPOSE 8080
+EXPOSE 3000
 
 CMD [ "/bin" ]

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -27,10 +28,11 @@ func HealthCheck(c echo.Context) error {
 // @Tags root
 // @Accept */*
 // @Produce json
-// @Success 200 {object} Response
+// @Success 200 {file} binary
 func DumpRoute(c echo.Context) error {
-	//Dump(db)
-	return c.JSON(http.StatusOK, Response{
-		Msg: "Dump success",
-	})
+	user := c.FormValue("user")
+	database := c.FormValue("database")
+	fmt.Println("Dumping database " + database + " for user " + user)
+	dumpExec := Dump()
+	return c.File(dumpExec.File)
 }

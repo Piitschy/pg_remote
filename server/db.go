@@ -41,7 +41,7 @@ func NewPostgres() *pg.Postgres {
 
 func Dump() pg.Result {
 	now := time.Now().Format("2006-01-02T15:04:05")
-	filename := "dump_" + now + ".sql"
+	filename := "dump_" + now + ".tar"
 
 	dump, err := pg.NewDump(DB)
 	if err != nil {

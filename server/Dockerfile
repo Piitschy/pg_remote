@@ -11,10 +11,11 @@ COPY go.sum ./
 RUN go mod download
 
 COPY *.go ./
-COPY ./static ./static
-
-RUN go build -o /bin
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN swag init
+RUN go build -o ./bin
+RUN chmod +x ./bin
 
 EXPOSE 3000
 
-CMD [ "/bin" ]
+CMD [ "./bin" ]

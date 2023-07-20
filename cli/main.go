@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ var user string
 var host string
 var port string
 var key string
+var filename string
 
 func main() {
 
@@ -59,6 +61,13 @@ func main() {
 						Usage:       "User to connect to the database",
 						Destination: &user,
 					},
+					&cli.StringFlag{
+						Name:        "filename",
+						Aliases:     []string{"f"},
+						Value:       "",
+						Usage:       "File to save the dump",
+						Destination: &filename,
+					},
 				},
 			},
 		},
@@ -74,12 +83,14 @@ func Dump(cCtx *cli.Context) error {
 	if database == "" {
 		return fmt.Errorf("database name is required")
 	}
+	fmt.Println("host: ", host)
 	fmt.Println("user: ", user)
 	body := []byte(`{
 		"database": "` + database + `",
 		"user": "` + user + `",
 	}`)
-	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewBuffer(body))
+	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader(body))
+	fmt.Println("request", r)
 	r.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -88,6 +99,19 @@ func Dump(cCtx *cli.Context) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	fmt.Println("response", resp)
 	fmt.Println("response Status:", resp.Status)
+
+	out := os.Stdout
+	if filename != "" {
+		out, err := os.Create(filename)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+	}
+	io.Copy(out, resp.Body)
+
 	return nil
 }

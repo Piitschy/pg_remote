@@ -39,13 +39,24 @@ paths:
       consumes:
       - '*/*'
       description: dump the database.
+      parameters:
+      - description: User
+        in: formData
+        name: user
+        required: true
+        type: string
+      - description: Database
+        in: formData
+        name: database
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Response'
+            type: file
       summary: Dump the database.
       tags:
       - root

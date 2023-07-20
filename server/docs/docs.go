@@ -61,11 +61,27 @@ const docTemplate = `{
                     "root"
                 ],
                 "summary": "Dump the database.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User",
+                        "name": "user",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Database",
+                        "name": "database",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Response"
+                            "type": "file"
                         }
                     }
                 }

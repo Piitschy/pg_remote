@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+
+  database:
+    restart: always
+    image: 'postgis/postgis:13-master'
+    networks:
+      - directus
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directus
+      POSTGRES_DB: directus
+
+  directus:
+    restart: always
+    image: 'directus/directus:9.26'
+    ports:
+      - '8055:8055'
+    networks:
+      - directus
+    depends_on:
+      - database
+    environment:
+      KEY: abc
+      SECRET: abc
+      CORS_ENABLED: 'true'
+      LOG_LEVEL: debug
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: '5432'
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus
+      ADMIN_EMAIL: 'ad@min.de'
+      ADMIN_PASSWORD: 'admin'
+
+  backup:
+    restart: always
+    build: './server'
+    networks:
+      - directus
+    ports:
+      - '8080:3000'
+    environment:
+      DB_HOST: database
+      DB_PORT: '5432'
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus
+
+
+networks:
+  directus: null

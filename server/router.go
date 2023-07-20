@@ -21,6 +21,11 @@ func HealthCheck(c echo.Context) error {
 	})
 }
 
+type DumpRequest struct {
+	User     string `json:"user" form:"user" query:"user"`
+	Database string `json:"database" form:"database" query:"database"`
+}
+
 // Dump DB
 // @Router /dump [post]
 // @Summary Dump the database.
@@ -28,11 +33,20 @@ func HealthCheck(c echo.Context) error {
 // @Tags root
 // @Accept */*
 // @Produce json
+// @Param user formData string true "User"
+// @Param database formData string true "Database"
 // @Success 200 {file} binary
 func DumpRoute(c echo.Context) error {
-	user := c.FormValue("user")
-	database := c.FormValue("database")
-	fmt.Println("Dumping database " + database + " for user " + user)
-	dumpExec := Dump()
-	return c.File(dumpExec.File)
+	fmt.Println("Dumping...")
+	req := new(DumpRequest)
+	c.Bind(req) //TODO: binding not working
+	fmt.Println(req)
+	user := req.User
+	database := req.Database
+	fmt.Println(user, database)
+	return c.JSON(http.StatusOK, Response{
+		Msg: fmt.Sprintf("Dumping %s database for user %s", database, user),
+	})
+	//dumpExec := Dump()
+	//return c.File(dumpExec.File)
 }

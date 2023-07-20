@@ -1,0 +1,54 @@
+basePath: /
+definitions:
+  main.Response:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Echo Swagger Example API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - '*/*'
+      description: get the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Show the status of server.
+      tags:
+      - root
+  /dump:
+    post:
+      consumes:
+      - '*/*'
+      description: dump the database.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Dump the database.
+      tags:
+      - root
+schemes:
+- http
+swagger: "2.0"

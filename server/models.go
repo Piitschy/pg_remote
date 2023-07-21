@@ -8,3 +8,5 @@ type DumpRequest struct {
 	User     string `json:"user"`
 	Database string `json:"database"`
 }
+
+type Empty struct{}

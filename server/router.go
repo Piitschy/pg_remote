@@ -28,7 +28,8 @@ func HealthCheck(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Success 200 {file} binary
-/*
+// @Param data body Empty true "future: dump params"
+/* //TODO: Add body params
 // @Param data body DumpRequest true "dump params"
 //dumpRequest := new(DumpRequest)
 //c.Bind(dumpRequest)

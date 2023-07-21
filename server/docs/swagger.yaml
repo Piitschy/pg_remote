@@ -1,11 +1,6 @@
 basePath: /
 definitions:
-  main.DumpRequest:
-    properties:
-      database:
-        type: string
-      user:
-        type: string
+  main.Empty:
     type: object
   main.Response:
     properties:
@@ -47,12 +42,12 @@ paths:
       - application/json
       description: dump the database.
       parameters:
-      - description: dump params
+      - description: 'future: dump params'
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/main.DumpRequest'
+          $ref: '#/definitions/main.Empty'
       produces:
       - application/json
       responses:

@@ -63,12 +63,12 @@ const docTemplate = `{
                 "summary": "Dump the database.",
                 "parameters": [
                     {
-                        "description": "dump params",
+                        "description": "future: dump params",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.DumpRequest"
+                            "$ref": "#/definitions/main.Empty"
                         }
                     }
                 ],
@@ -84,16 +84,8 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.DumpRequest": {
-            "type": "object",
-            "properties": {
-                "database": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
+        "main.Empty": {
+            "type": "object"
         },
         "main.Response": {
             "type": "object",

@@ -33,13 +33,14 @@ func main() {
 
 	DB = NewPostgres()
 
-	fmt.Println("DB_HOST:", DB.Host, "DB_PORT:", DB.Port, "DB_NAME:", DB.DB, "DB_USER:", DB.Username, "DB_PASSWORD:", DB.Password)
+	fmt.Println("DB_HOST:", DB.Host, "DB_PORT:", DB.Port, "DB_NAME:", DB.DB, "DB_USER:", DB.Username)
 
 	// Echo instance
 	e := echo.New()
 
 	// Middleware
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORS())
 
 	// Routes
 	e.GET("/", HealthCheck)

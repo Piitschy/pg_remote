@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	pg "github.com/habx/pg-commands"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -30,6 +32,8 @@ func main() {
 	// Get env variables
 
 	DB = NewPostgres()
+
+	fmt.Println("DB_HOST:", DB.Host, "DB_PORT:", DB.Port, "DB_NAME:", DB.DB, "DB_USER:", DB.Username, "DB_PASSWORD:", DB.Password)
 
 	// Echo instance
 	e := echo.New()

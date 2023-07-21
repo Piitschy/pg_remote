@@ -11,7 +11,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var user string
 var host string
 var port string
 var key string
@@ -55,13 +54,6 @@ func main() {
 				Action:    Dump,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:        "User",
-						Aliases:     []string{"U"},
-						Value:       "postgres",
-						Usage:       "User to connect to the database",
-						Destination: &user,
-					},
-					&cli.StringFlag{
 						Name:        "filename",
 						Aliases:     []string{"f"},
 						Value:       "",
@@ -79,17 +71,8 @@ func main() {
 }
 
 func Dump(cCtx *cli.Context) error {
-	database := cCtx.Args().First()
-	if database == "" {
-		return fmt.Errorf("database name is required")
-	}
 	fmt.Println("host: ", host)
-	fmt.Println("user: ", user)
-	body := []byte(`{
-		"database": "` + database + `",
-		"user": "` + user + `",
-	}`)
-	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader(body))
+	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader([]byte{}))
 	fmt.Println("request", r)
 	r.Header.Set("Content-Type", "application/json")
 

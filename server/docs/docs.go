@@ -52,7 +52,7 @@ const docTemplate = `{
             "post": {
                 "description": "dump the database.",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -63,18 +63,13 @@ const docTemplate = `{
                 "summary": "Dump the database.",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User",
-                        "name": "user",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Database",
-                        "name": "database",
-                        "in": "formData",
-                        "required": true
+                        "description": "dump params",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.DumpRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -89,6 +84,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "main.DumpRequest": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
         "main.Response": {
             "type": "object",
             "properties": {

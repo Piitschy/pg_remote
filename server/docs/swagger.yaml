@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  main.DumpRequest:
+    properties:
+      database:
+        type: string
+      user:
+        type: string
+    type: object
   main.Response:
     properties:
       message:
@@ -37,19 +44,15 @@ paths:
   /dump:
     post:
       consumes:
-      - '*/*'
+      - application/json
       description: dump the database.
       parameters:
-      - description: User
-        in: formData
-        name: user
+      - description: dump params
+        in: body
+        name: data
         required: true
-        type: string
-      - description: Database
-        in: formData
-        name: database
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/main.DumpRequest'
       produces:
       - application/json
       responses:

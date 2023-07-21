@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -21,11 +20,6 @@ func HealthCheck(c echo.Context) error {
 	})
 }
 
-type DumpRequest struct {
-	User     string `json:"user"`
-	Database string `json:"database"`
-}
-
 // Dump DB
 // @Router /dump [post]
 // @Summary Dump the database.
@@ -40,8 +34,8 @@ type DumpRequest struct {
 //c.Bind(dumpRequest)
 */
 func DumpRoute(c echo.Context) error {
-	fmt.Println("Dumping...")
+	c.Logger().Info("Dumping...")
 	dumpExec := Dump()
-	fmt.Println("\n", dumpExec.Output, "\n", dumpExec.File, "\n")
+	c.Logger().Info(dumpExec.File)
 	return c.File(dumpExec.File)
 }

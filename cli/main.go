@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
@@ -62,6 +63,11 @@ func main() {
 					},
 				},
 			},
+			{
+				Name:   "ping",
+				Usage:  "Test connection to server",
+				Action: Ping,
+			},
 		},
 	}
 
@@ -73,8 +79,9 @@ func main() {
 func Dump(cCtx *cli.Context) error {
 	fmt.Println("host: ", host)
 	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader([]byte{}))
-	fmt.Println("request", r)
 	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set("Accept", "application/json")
+	r.Header.Set("Key", key)
 
 	client := &http.Client{}
 	resp, err := client.Do(r)
@@ -96,5 +103,24 @@ func Dump(cCtx *cli.Context) error {
 	}
 	io.Copy(out, resp.Body)
 
+	return nil
+}
+
+func Ping(cCtx *cli.Context) error {
+	start := time.Now()
+	fmt.Println("host: ", host)
+	r, _ := http.NewRequest("GET", "http://"+host+":"+port+"/", bytes.NewReader([]byte{}))
+	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set("Accept", "application/json")
+	r.Header.Set("Key", key)
+	client := &http.Client{}
+	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response time:", time.Now().Sub(start))
+	fmt.Println("response Status:", resp.Status)
 	return nil
 }

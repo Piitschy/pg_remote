@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	pg "github.com/habx/pg-commands"
 	"github.com/labstack/echo/v4"
@@ -37,6 +38,12 @@ func main() {
 
 	// Echo instance
 	e := echo.New()
+	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		KeyLookup: "header:Key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			return key == os.Getenv("KEY"), nil
+		},
+	}))
 
 	// Middleware
 	e.Use(middleware.Logger())

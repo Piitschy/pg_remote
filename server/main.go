@@ -38,20 +38,21 @@ func main() {
 
 	// Echo instance
 	e := echo.New()
-	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		KeyLookup: "header:Key",
-		Validator: func(key string, c echo.Context) (bool, error) {
-			return key == os.Getenv("KEY"), nil
-		},
-	}))
 
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
 
+	keyAuth := middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		KeyLookup: "header:Key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			return key == os.Getenv("KEY"), nil
+		},
+	})
+
 	// Routes
-	e.GET("/", HealthCheck)
-	e.POST("/dump", DumpRoute)
+	e.GET("/", HealthCheck, keyAuth)
+	e.POST("/dump", DumpRoute, keyAuth)
 	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	// Start server

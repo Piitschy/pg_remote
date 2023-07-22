@@ -13,6 +13,7 @@ import (
 // @Tags root
 // @Accept */*
 // @Produce json
+// @Param Key header string true "Key from environment"
 // @Success 200 {object} Response
 func HealthCheck(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{
@@ -28,6 +29,7 @@ func HealthCheck(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Success 200 {file} binary
+// @Param Key header string true "Key from environment"
 // @Param data body Empty true "future: dump params"
 /* //TODO: Add body params
 // @Param data body DumpRequest true "dump params"

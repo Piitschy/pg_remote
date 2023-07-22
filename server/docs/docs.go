@@ -38,6 +38,15 @@ const docTemplate = `{
                     "root"
                 ],
                 "summary": "Show the status of server.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Key from environment",
+                        "name": "Key",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -62,6 +71,13 @@ const docTemplate = `{
                 ],
                 "summary": "Dump the database.",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Key from environment",
+                        "name": "Key",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "future: dump params",
                         "name": "data",

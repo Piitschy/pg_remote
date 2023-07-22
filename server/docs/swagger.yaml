@@ -26,6 +26,12 @@ paths:
       consumes:
       - '*/*'
       description: get the status of server.
+      parameters:
+      - description: Key from environment
+        in: header
+        name: Key
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -42,6 +48,11 @@ paths:
       - application/json
       description: dump the database.
       parameters:
+      - description: Key from environment
+        in: header
+        name: Key
+        required: true
+        type: string
       - description: 'future: dump params'
         in: body
         name: data

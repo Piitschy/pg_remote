@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -27,7 +29,7 @@ func HealthCheck(c echo.Context) error {
 // @Description dump the database.
 // @Tags root
 // @Accept json
-// @Produce json
+// @Produce binary
 // @Success 200 {file} binary
 // @Param Key header string true "Key from environment"
 // @Param data body Empty true "future: dump params"
@@ -41,4 +43,41 @@ func DumpRoute(c echo.Context) error {
 	dumpExec := Dump()
 	c.Logger().Info(dumpExec.File)
 	return c.File(dumpExec.File)
+}
+
+// Restore DB
+// @Router /restore [post]
+// @Summary Restore the database.
+// @Description Restore the database.
+// @Tags root
+// @Accept json
+// @Produce binary
+// @Success 200 {file} binary
+// @Param Key header string true "Key from environment"
+// @Param data body Empty true "future: dump params"
+func RestoreRoute(c echo.Context) error {
+	c.Logger().Info("Restoring...")
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dst, err := os.Create(file.Filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, Response{
+		Msg: "Restore",
+	})
 }

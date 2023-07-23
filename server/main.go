@@ -53,6 +53,7 @@ func main() {
 	// Routes
 	e.GET("/", HealthCheck, keyAuth)
 	e.POST("/dump", DumpRoute, keyAuth)
+	e.POST("/restore", RestoreRoute, keyAuth)
 	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	// Start server

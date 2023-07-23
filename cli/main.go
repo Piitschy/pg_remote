@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -93,15 +94,18 @@ func Dump(cCtx *cli.Context) error {
 	fmt.Println("response", resp)
 	fmt.Println("response Status:", resp.Status)
 
-	out := os.Stdout
+	writer := bufio.NewWriter(os.Stdout)
 	if filename != "" {
-		out, err := os.Create(filename)
+		file, err := os.Create(filename)
 		if err != nil {
 			return err
 		}
-		defer out.Close()
+		defer file.Close()
+		writer = bufio.NewWriter(file)
 	}
-	io.Copy(out, resp.Body)
+	defer writer.Flush()
+
+	io.Copy(writer, resp.Body)
 
 	return nil
 }

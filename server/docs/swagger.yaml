@@ -69,6 +69,27 @@ paths:
       summary: Dump the database.
       tags:
       - root
+  /restore:
+    post:
+      consumes:
+      - application/json
+      description: Restore the database.
+      parameters:
+      - description: Key from environment
+        in: header
+        name: Key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      summary: Restore the database.
+      tags:
+      - root
 schemes:
 - http
 swagger: "2.0"

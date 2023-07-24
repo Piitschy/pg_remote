@@ -29,7 +29,7 @@ func HealthCheck(c echo.Context) error {
 // @Description dump the database.
 // @Tags root
 // @Accept json
-// @Produce binary
+// @Produce json
 // @Success 200 {file} binary
 // @Param Key header string true "Key from environment"
 // @Param data body Empty true "future: dump params"
@@ -51,10 +51,9 @@ func DumpRoute(c echo.Context) error {
 // @Description Restore the database.
 // @Tags root
 // @Accept json
-// @Produce binary
+// @Produce json
 // @Success 200 {file} binary
 // @Param Key header string true "Key from environment"
-// @Param data body Empty true "future: dump params"
 func RestoreRoute(c echo.Context) error {
 	c.Logger().Info("Restoring...")
 	file, err := c.FormFile("file")

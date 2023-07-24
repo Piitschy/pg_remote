@@ -41,13 +41,13 @@ func NewPostgres() *pg.Postgres {
 
 func Dump() pg.Result {
 	now := time.Now().Format("2006-01-02T15:04:05")
-	filename := "dump_" + now + ".sql"
+	filename := "dump_" + now + ".tar"
 	dump, err := pg.NewDump(DB)
 	if err != nil {
 		panic(err)
 	}
 	dump.SetFileName(filename)
-	dump.SetupFormat("p")
+	dump.SetupFormat("t")
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: false})
 	if dumpExec.Error != nil {
 		fmt.Println(dumpExec.Error.Err)
@@ -63,6 +63,8 @@ func Restore(path string) error {
 	if err != nil {
 		panic(err)
 	}
+
+	restore.Options = append(restore.Options, "-Ft")
 
 	restoreExec := restore.Exec(path, pg.ExecOptions{StreamPrint: false})
 	if restoreExec.Error != nil {

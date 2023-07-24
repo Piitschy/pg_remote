@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/urfave/cli/v2"
@@ -16,7 +19,6 @@ import (
 var host string
 var port string
 var key string
-var filename string
 
 func main() {
 
@@ -52,17 +54,15 @@ func main() {
 				Name:      "dump",
 				Aliases:   []string{"d"},
 				Usage:     "dump a remote database",
-				ArgsUsage: "[database]",
+				ArgsUsage: "[target file]",
 				Action:    Dump,
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:        "filename",
-						Aliases:     []string{"f"},
-						Value:       "",
-						Usage:       "File to save the dump",
-						Destination: &filename,
-					},
-				},
+			},
+			{
+				Name:      "restore",
+				Aliases:   []string{"r"},
+				Usage:     "restore a remote database",
+				ArgsUsage: "[source file]",
+				Action:    Restore,
 			},
 			{
 				Name:   "ping",
@@ -78,6 +78,8 @@ func main() {
 }
 
 func Dump(cCtx *cli.Context) error {
+	filename := defaultFilename(cCtx.Args().First())
+
 	fmt.Println("host: ", host)
 	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader([]byte{}))
 	r.Header.Set("Content-Type", "application/json")
@@ -90,8 +92,8 @@ func Dump(cCtx *cli.Context) error {
 		return err
 	}
 	defer resp.Body.Close()
+	body := bufio.NewReader(resp.Body)
 
-	fmt.Println("response", resp)
 	fmt.Println("response Status:", resp.Status)
 
 	writer := bufio.NewWriter(os.Stdout)
@@ -105,15 +107,30 @@ func Dump(cCtx *cli.Context) error {
 	}
 	defer writer.Flush()
 
-	io.Copy(writer, resp.Body)
+	io.Copy(writer, body)
 
 	return nil
 }
 
 func Restore(cCtx *cli.Context) error {
+	filename := defaultFilename(cCtx.Args().First())
+
 	fmt.Println("host: ", host)
-	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/restore", bytes.NewReader([]byte{}))
-	r.Header.Set("Content-Type", "application/json")
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	io.Copy(part, file)
+	writer.Close()
+
+	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/restore", body)
+	r.Header.Add("Content-Type", writer.FormDataContentType())
 	r.Header.Set("Accept", "application/json")
 	r.Header.Set("Key", key)
 
@@ -122,7 +139,7 @@ func Restore(cCtx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("response", resp)
+
 	fmt.Println("response Status:", resp.Status)
 
 	return nil
@@ -145,4 +162,14 @@ func Ping(cCtx *cli.Context) error {
 	fmt.Println("response time:", time.Now().Sub(start))
 	fmt.Println("response Status:", resp.Status)
 	return nil
+}
+
+func defaultFilename(filename string) string {
+	if filename == "" {
+		filename = "dump.tar"
+	}
+	if strings.Split(filename, ".")[len(strings.Split(filename, "."))-1] != "tar" {
+		filename = filename + ".tar"
+	}
+	return filename
 }

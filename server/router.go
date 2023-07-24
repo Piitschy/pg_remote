@@ -77,7 +77,14 @@ func RestoreRoute(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
+
+	err = Restore(file.Filename)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Response{
+			Msg: "Error restoring",
+		})
+	}
 	return c.JSON(http.StatusOK, Response{
-		Msg: "Restore",
+		Msg: "Restored successfully",
 	})
 }

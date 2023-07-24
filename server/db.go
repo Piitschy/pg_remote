@@ -58,17 +58,19 @@ func Dump() pg.Result {
 	return dumpExec
 }
 
-func Restore(dumpExec pg.Result) {
+func Restore(path string) error {
 	restore, err := pg.NewRestore(DB)
 	if err != nil {
 		panic(err)
 	}
 
-	restoreExec := restore.Exec(dumpExec.File, pg.ExecOptions{StreamPrint: false})
+	restoreExec := restore.Exec(path, pg.ExecOptions{StreamPrint: false})
 	if restoreExec.Error != nil {
 		fmt.Println(restoreExec.Error.Err)
 		fmt.Println(restoreExec.Output)
+		return restoreExec.Error.Err
 	}
 	fmt.Println("Restore success")
 	fmt.Println(restoreExec.Output)
+	return nil
 }

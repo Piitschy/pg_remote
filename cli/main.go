@@ -110,6 +110,24 @@ func Dump(cCtx *cli.Context) error {
 	return nil
 }
 
+func Restore(cCtx *cli.Context) error {
+	fmt.Println("host: ", host)
+	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/restore", bytes.NewReader([]byte{}))
+	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set("Accept", "application/json")
+	r.Header.Set("Key", key)
+
+	client := &http.Client{}
+	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	}
+	fmt.Println("response", resp)
+	fmt.Println("response Status:", resp.Status)
+
+	return nil
+}
+
 func Ping(cCtx *cli.Context) error {
 	start := time.Now()
 	fmt.Println("host: ", host)

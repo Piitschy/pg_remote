@@ -23,24 +23,3 @@ Beim Restoring wird immer auch ein Dump erzeugt.
 ```bash
 pg_remote -H <host> -p <post> -k <Key> restore [dump.tar]
 ```
-
-
-## Future:
-
-### list
-
-Gibt eine Liste aller gespecherten Dumps
-
-```bash
-pg_remote -H <host> -p <post> list
-```
-
-### load
-
-```bash
-pg_remote -H <host> -p <post> load [dumpname] > dump.sql
-```
-oder
-```bash
-pg_remote -H <host> -p <post> load -f dump.sql [dumpname]
-```

@@ -37,7 +37,7 @@ services:
 
   backup:
     restart: always
-    build: ./server
+    build: ../server
     networks:
       - directus
     ports:

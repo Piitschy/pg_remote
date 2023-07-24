@@ -93,6 +93,38 @@
                     }
                 }
             }
+        },
+        "/restore": {
+            "post": {
+                "description": "Restore the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "root"
+                ],
+                "summary": "Restore the database.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Key from environment",
+                        "name": "Key",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

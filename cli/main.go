@@ -82,13 +82,6 @@ func main() {
 				Action:    Restore,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:        "format",
-						Aliases:     []string{"f"},
-						Value:       "tar",
-						Usage:       "`FORMAT` of the dump file ('tar' | 'pain')",
-						Destination: &format,
-					},
-					&cli.StringFlag{
 						Name:        "input-file",
 						Aliases:     []string{"i"},
 						Value:       "dump",
@@ -147,6 +140,8 @@ func Dump(cCtx *cli.Context) error {
 func Restore(cCtx *cli.Context) error {
 
 	fmt.Println("host: ", host)
+
+	format = detectFormat(filename)
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -209,4 +204,15 @@ func extFilename(filename string) string {
 		filename = filename + "." + ext
 	}
 	return filename
+}
+
+func detectFormat(filename string) string {
+	ext := strings.Split(filename, ".")[len(strings.Split(filename, "."))-1]
+	if ext == "tar" {
+		return "tar"
+	}
+	if ext == "sql" || ext == "txt" {
+		return "plain"
+	}
+	return "custom"
 }

@@ -13,7 +13,11 @@ Die CLI nutzt den offenen Port, um mit http-Methoden Daten zu transferieren.
 ### dump
 
 ```bash
-pg_remote -H <host> -p <post> -k <Key> dump [dump.tar]
+pg_remote -H <host> -p <post> -k <Key> dump -f <format 'tar'|'plain'> -o <filename>
+```
+oder
+```bash
+pg_remote -H <host> -p <post> -k <Key> dump -f plain > dump.sql
 ```
 
 ### restore
@@ -21,5 +25,9 @@ pg_remote -H <host> -p <post> -k <Key> dump [dump.tar]
 Beim Restoring wird immer auch ein Dump erzeugt.
 
 ```bash
-pg_remote -H <host> -p <post> -k <Key> restore [dump.tar]
+pg_remote -H <host> -p <post> -k <Key> restore -o <filename>
+```
+oder
+```bash
+pg_remote -H <host> -p <post> -k <Key> restore < dump.sql
 ```

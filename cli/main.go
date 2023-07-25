@@ -19,6 +19,8 @@ import (
 var host string
 var port string
 var key string
+var format string
+var filename string
 
 func main() {
 
@@ -51,11 +53,26 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			{
-				Name:      "dump",
-				Aliases:   []string{"d"},
-				Usage:     "dump a remote database",
-				ArgsUsage: "[target file]",
-				Action:    Dump,
+				Name:    "dump",
+				Aliases: []string{"d"},
+				Usage:   "dump a remote database",
+				Action:  Dump,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "format",
+						Aliases:     []string{"f"},
+						Value:       "tar",
+						Usage:       "`FORMAT` of the dump file ('tar' | 'pain')",
+						Destination: &format,
+					},
+					&cli.StringFlag{
+						Name:        "output-file",
+						Aliases:     []string{"o"},
+						Value:       "dump",
+						Usage:       "output file `NAME`",
+						Destination: &filename,
+					},
+				},
 			},
 			{
 				Name:      "restore",
@@ -63,6 +80,22 @@ func main() {
 				Usage:     "restore a remote database",
 				ArgsUsage: "[source file]",
 				Action:    Restore,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "format",
+						Aliases:     []string{"f"},
+						Value:       "tar",
+						Usage:       "`FORMAT` of the dump file ('tar' | 'pain')",
+						Destination: &format,
+					},
+					&cli.StringFlag{
+						Name:        "input-file",
+						Aliases:     []string{"i"},
+						Value:       "dump",
+						Usage:       "input file `NAME`",
+						Destination: &filename,
+					},
+				},
 			},
 			{
 				Name:   "ping",
@@ -78,11 +111,10 @@ func main() {
 }
 
 func Dump(cCtx *cli.Context) error {
-	filename := defaultFilename(cCtx.Args().First())
 
 	fmt.Println("host: ", host)
 	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader([]byte{}))
-	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set("Content-Type", "application/json") //TODO: Transmit format
 	r.Header.Set("Accept", "application/json")
 	r.Header.Set("Key", key)
 
@@ -98,7 +130,7 @@ func Dump(cCtx *cli.Context) error {
 
 	writer := bufio.NewWriter(os.Stdout)
 	if filename != "" {
-		file, err := os.Create(filename)
+		file, err := os.Create(extFilename(filename))
 		if err != nil {
 			return err
 		}
@@ -113,7 +145,6 @@ func Dump(cCtx *cli.Context) error {
 }
 
 func Restore(cCtx *cli.Context) error {
-	filename := defaultFilename(cCtx.Args().First())
 
 	fmt.Println("host: ", host)
 
@@ -130,7 +161,7 @@ func Restore(cCtx *cli.Context) error {
 	writer.Close()
 
 	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/restore", body)
-	r.Header.Add("Content-Type", writer.FormDataContentType())
+	r.Header.Add("Content-Type", writer.FormDataContentType()) //TODO: Transmit format
 	r.Header.Set("Accept", "application/json")
 	r.Header.Set("Key", key)
 
@@ -164,12 +195,18 @@ func Ping(cCtx *cli.Context) error {
 	return nil
 }
 
-func defaultFilename(filename string) string {
-	if filename == "" {
-		filename = "dump.tar"
+func extFilename(filename string) string {
+	var ext string
+	if format == "tar" {
+		ext = "tar"
+	} else {
+		ext = "sql"
 	}
-	if strings.Split(filename, ".")[len(strings.Split(filename, "."))-1] != "tar" {
-		filename = filename + ".tar"
+	if filename == "" {
+		filename = "dump." + ext
+	}
+	if strings.Split(filename, ".")[len(strings.Split(filename, "."))-1] != ext {
+		filename = filename + "." + ext
 	}
 	return filename
 }

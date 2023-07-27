@@ -45,7 +45,7 @@ func main() {
 
 			&cli.StringFlag{
 				Name:        "key",
-				Aliases:     []string{"k"},
+				Aliases:     []string{"k", "K"},
 				Value:       "",
 				Usage:       "Path the key from the environment variable KEY",
 				Destination: &key,

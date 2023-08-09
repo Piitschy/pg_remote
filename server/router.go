@@ -40,7 +40,7 @@ func HealthCheck(c echo.Context) error {
 */
 func DumpRoute(c echo.Context) error {
 	c.Logger().Info("Dumping...")
-	dumpExec := Dump()
+	dumpExec := Dump("t")
 	c.Logger().Info(dumpExec.File)
 	return c.File(dumpExec.File)
 }

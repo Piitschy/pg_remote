@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -39,15 +40,21 @@ func NewPostgres() *pg.Postgres {
 	}
 }
 
-func Dump() pg.Result {
+func Dump(format string) pg.Result {
+	if format == "" {
+		format = "t"
+	}
+	if format != "t" && format != "p" {
+		log.Fatal("Format must be t or p")
+	}
 	now := time.Now().Format("2006-01-02T15:04:05")
-	filename := "dump_" + now + ".tar"
+	filename := "dump_" + now + "." + ext(format)
 	dump, err := pg.NewDump(DB)
 	if err != nil {
 		panic(err)
 	}
 	dump.SetFileName(filename)
-	dump.SetupFormat("t")
+	dump.SetupFormat(format)
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: false})
 	if dumpExec.Error != nil {
 		fmt.Println(dumpExec.Error.Err)
@@ -75,4 +82,11 @@ func Restore(path string) error {
 	fmt.Println("Restore success")
 	fmt.Println(restoreExec.Output)
 	return nil
+}
+
+func ext(format string) string {
+	if format == "p" {
+		return "sql"
+	}
+	return "tar"
 }

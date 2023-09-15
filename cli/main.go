@@ -62,7 +62,7 @@ func main() {
 						Name:        "format",
 						Aliases:     []string{"f"},
 						Value:       "tar",
-						Usage:       "`FORMAT` of the dump file ('tar' | 'pain')",
+						Usage:       "`FORMAT` of the dump file ('tar' | 'plain')",
 						Destination: &format,
 					},
 					&cli.StringFlag{

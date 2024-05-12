@@ -1,18 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	pg "github.com/habx/pg-commands"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
+	db "github.com/Piitschy/postgress-dump-tool/internal/db"
 	_ "github.com/Piitschy/postgress-dump-tool/server/docs"
 )
-
-var DB *pg.Postgres
 
 // @title Echo Swagger Example API
 // @version 1.0
@@ -30,11 +27,13 @@ var DB *pg.Postgres
 // @BasePath /
 // @schemes http
 func main() {
-	// Get env variables
-
-	DB = NewPostgres()
-
-	fmt.Println("DB_HOST:", DB.Host, "DB_PORT:", DB.Port, "DB_NAME:", DB.DB, "DB_USER:", DB.Username)
+	// Load db from env
+	// DB_HOST
+	// DB_DATABASE
+	// DB_USER
+	// DB_PASSWORD
+	// DB_PORT
+	db := db.NewPostgresFromEnv()
 
 	// Echo instance
 	e := echo.New()
@@ -52,8 +51,11 @@ func main() {
 
 	// Routes
 	e.GET("/", HealthCheck, keyAuth)
-	e.POST("/dump", DumpRoute, keyAuth)
-	e.POST("/restore", RestoreRoute, keyAuth)
+	e.POST("/dump", DumpRoute(db), keyAuth)
+	e.POST("/restore", RestoreRoute(db), keyAuth)
+	e.GET("/docs", func(c echo.Context) error {
+		return c.Redirect(301, "/docs/index.html")
+	})
 	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	// Start server

@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -10,9 +10,21 @@ import (
 	pg "github.com/habx/pg-commands"
 )
 
+// Postgres is a wrapper around pg.postgres
+// ENV variables:
+// DB_HOST
+// DB_DATABASE
+// DB_USER
+// DB_PASSWORD
+// DB_PORT
+
 type path string
 
-func NewPostgres() *pg.Postgres {
+type Postgres struct {
+	pg.Postgres
+}
+
+func NewPostgresFromEnv() *Postgres {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = "localhost"
@@ -31,16 +43,21 @@ func NewPostgres() *pg.Postgres {
 	if err != nil {
 		panic(err)
 	}
-	return &pg.Postgres{
+	return NewPostgres(host, db, user, password, port)
+}
+
+func NewPostgres(host, db, user, password string, port int) *Postgres {
+	postgres := pg.Postgres{
 		Host:     host,
 		Port:     port,
 		DB:       db,
 		Username: user,
 		Password: password,
 	}
+	return &Postgres{postgres}
 }
 
-func Dump(format string) pg.Result {
+func (db *Postgres) Dump(format string) pg.Result {
 	if format == "" {
 		format = "t"
 	}
@@ -49,7 +66,7 @@ func Dump(format string) pg.Result {
 	}
 	now := time.Now().Format("2006-01-02T15:04:05")
 	filename := "dump_" + now + "." + ext(format)
-	dump, err := pg.NewDump(DB)
+	dump, err := pg.NewDump(&db.Postgres)
 	if err != nil {
 		panic(err)
 	}
@@ -65,8 +82,8 @@ func Dump(format string) pg.Result {
 	return dumpExec
 }
 
-func Restore(path string) error {
-	restore, err := pg.NewRestore(DB)
+func (db *Postgres) Restore(path string) error {
+	restore, err := pg.NewRestore(&db.Postgres)
 	if err != nil {
 		panic(err)
 	}

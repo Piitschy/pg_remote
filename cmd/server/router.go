@@ -5,8 +5,20 @@ import (
 	"net/http"
 	"os"
 
+	db "github.com/Piitschy/postgress-dump-tool/internal/db"
 	"github.com/labstack/echo/v4"
 )
+
+type Response struct {
+	Msg string `json:"message"`
+}
+
+type DumpRequest struct {
+	User     string `json:"user"`
+	Database string `json:"database"`
+}
+
+type Empty struct{}
 
 // HealthCheck godoc
 // @Router / [get]
@@ -38,11 +50,13 @@ func HealthCheck(c echo.Context) error {
 //dumpRequest := new(DumpRequest)
 //c.Bind(dumpRequest)
 */
-func DumpRoute(c echo.Context) error {
-	c.Logger().Info("Dumping...")
-	dumpExec := Dump("t")
-	c.Logger().Info(dumpExec.File)
-	return c.File(dumpExec.File)
+func DumpRoute(db db.Database) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		c.Logger().Info("Dumping...")
+		dumpExec := db.Dump("t")
+		c.Logger().Info(dumpExec.File)
+		return c.File(dumpExec.File)
+	}
 }
 
 // Restore DB
@@ -54,36 +68,38 @@ func DumpRoute(c echo.Context) error {
 // @Produce json
 // @Success 200 {file} binary
 // @Param Key header string true "Key from environment"
-func RestoreRoute(c echo.Context) error {
-	c.Logger().Info("Restoring...")
-	file, err := c.FormFile("file")
-	if err != nil {
-		return err
-	}
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
+func RestoreRoute(db db.Database) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		c.Logger().Info("Restoring...")
+		file, err := c.FormFile("file")
+		if err != nil {
+			return err
+		}
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
 
-	dst, err := os.Create(file.Filename)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
+		dst, err := os.Create(file.Filename)
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
 
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
-	}
+		// Copy
+		if _, err = io.Copy(dst, src); err != nil {
+			return err
+		}
 
-	err = Restore(file.Filename)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Response{
-			Msg: "Error restoring",
+		err = db.Restore(file.Filename)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Response{
+				Msg: "Error restoring",
+			})
+		}
+		return c.JSON(http.StatusOK, Response{
+			Msg: "Restored successfully",
 		})
 	}
-	return c.JSON(http.StatusOK, Response{
-		Msg: "Restored successfully",
-	})
 }

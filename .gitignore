@@ -19,6 +19,7 @@
 
 # Go workspace file
 go.work
-server/tmp/runner-build
-server/tmp/runner-build
-server/tmp/runner-build
+*/tmp/**
+./tmp/**
+tmp/**
+

@@ -1,11 +1,15 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	pg "github.com/habx/pg-commands"
 )
@@ -43,10 +47,24 @@ func NewPostgresFromEnv() *Postgres {
 	if err != nil {
 		panic(err)
 	}
-	return NewPostgres(host, db, user, password, port)
+	return NewPostgres(host, port, db, user, password)
 }
 
-func NewPostgres(host, db, user, password string, port int) *Postgres {
+// postgres://username:password@localhost:32781/database?sslmode=disable
+func NewPostgresFromConnString(connString string) (*Postgres, error) {
+	var err error = nil
+	sections := strings.Split(strings.Split(connString, "://")[1], "@")
+	username := strings.Split(sections[0], ":")[0]
+	password := strings.Split(sections[0], ":")[1]
+	host := strings.Split(sections[1], ":")[0]
+	portStr := strings.Split(strings.Split(sections[1], ":")[1], "/")[0]
+	db := strings.Split(strings.Split(sections[1], "/")[1], "?")[0]
+
+	port, err := strconv.Atoi(portStr)
+	return NewPostgres(host, port, db, username, password), err
+}
+
+func NewPostgres(host string, port int, db, user, password string) *Postgres {
 	postgres := pg.Postgres{
 		Host:     host,
 		Port:     port,
@@ -55,6 +73,20 @@ func NewPostgres(host, db, user, password string, port int) *Postgres {
 		Password: password,
 	}
 	return &Postgres{postgres}
+}
+
+func (db *Postgres) GetUrl() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", db.Username, db.Password, db.Host, db.Port, db.DB)
+}
+
+func (db *Postgres) TestConnection() error {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, db.GetUrl())
+	if err != nil {
+		return err
+	}
+	conn.Close(ctx)
+	return nil
 }
 
 func (db *Postgres) Dump(format string) pg.Result {

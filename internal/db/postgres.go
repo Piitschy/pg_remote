@@ -92,6 +92,7 @@ func (db *Postgres) TestConnection() error {
 
 // Dump creates a dump of the database in the specified path
 // format can be "sql" or "tar" (or "p" or "t")
+// ! Dump writes only plain sql!!!
 func (db *Postgres) Dump(path string, format string) (pg.Result, error) {
 	format, err := utils.FormatFlag(format)
 	if err != nil {
@@ -108,7 +109,7 @@ func (db *Postgres) Dump(path string, format string) (pg.Result, error) {
 		return pg.Result{}, err
 	}
 	dump.SetFileName(filename)
-	dump.SetupFormat(format)
+	dump.SetupFormat(format) //! Dump writes only plain sql!!!
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: false})
 	if dumpExec.Error != nil {
 		return dumpExec, dumpExec.Error.Err

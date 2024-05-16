@@ -2,13 +2,14 @@
 
 FROM golang:1.22-alpine AS build-stage
 WORKDIR /app
-COPY go.mod ./
-COPY go.sum ./
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
-COPY ./cmd/server/*.go ./
+COPY ./cmd/server/ ./
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN swag init
+COPY ./internal/ ./internal/
 RUN go build -o /server
 
 FROM build-stagen AS test-stage

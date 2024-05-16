@@ -25,8 +25,8 @@ var filename string
 func main() {
 
 	app := &cli.App{
-		Name:  "pg_remote",
-		Usage: "pg_remote is a tool for managing remote postgresql databases",
+		Name:  "pgrd",
+		Usage: "pgrd (postgres remote dump) is a tool for managing remote postgres based databases.\nIt allows you to dump and restore databases remotely.\n\nFor example:\npgrd -H localhost -p 5432 -k yourservice dump -o dump.tar",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "host",
@@ -55,20 +55,20 @@ func main() {
 			{
 				Name:    "dump",
 				Aliases: []string{"d"},
-				Usage:   "dump a remote database",
+				Usage:   "dump a remote database that has the server connected.\n\nFor example:\npgrd -H localhost -p 5432 -k yourservice dump -o dump.tar",
 				Action:  Dump,
 				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:        "format",
-						Aliases:     []string{"f"},
-						Value:       "tar",
-						Usage:       "`FORMAT` of the dump file ('tar' | 'plain')",
-						Destination: &format,
-					},
+					// &cli.StringFlag{
+					// 	Name:        "format",
+					// 	Aliases:     []string{"f"},
+					// 	Value:       "tar",
+					// 	Usage:       "`FORMAT` of the dump file ('tar'/'t' | 'plain'/'p' | 'custom'/'c')",
+					// 	Destination: &format,
+					// },
 					&cli.StringFlag{
 						Name:        "output-file",
 						Aliases:     []string{"o"},
-						Value:       "dump",
+						Value:       "dump.tar",
 						Usage:       "output file `NAME`",
 						Destination: &filename,
 					},
@@ -77,7 +77,7 @@ func main() {
 			{
 				Name:      "restore",
 				Aliases:   []string{"r"},
-				Usage:     "restore a remote database",
+				Usage:     "restore a remote database.\n\nFor example:\npgrd -H localhost -p 5432 -k yourservice restore -i dump.tar",
 				ArgsUsage: "[source file]",
 				Action:    Restore,
 				Flags: []cli.Flag{
@@ -98,14 +98,25 @@ func main() {
 		},
 	}
 
+	envs()
+
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
 
+func envs() {
+	host = os.Getenv("PGRD_HOST")
+	port = os.Getenv("PGRD_PORT")
+	key = os.Getenv("PGRD_KEY")
+
+	filename = os.Getenv("PGRD_FILENAME")
+	format = os.Getenv("PGRD_FORMAT")
+}
+
 func Dump(cCtx *cli.Context) error {
 
-	fmt.Println("host: ", host)
+	log.Println("host: ", host)
 	r, _ := http.NewRequest("POST", "http://"+host+":"+port+"/dump", bytes.NewReader([]byte{}))
 	r.Header.Set("Content-Type", "application/json") //TODO: Transmit format
 	r.Header.Set("Accept", "application/json")
@@ -119,11 +130,22 @@ func Dump(cCtx *cli.Context) error {
 	defer resp.Body.Close()
 	body := bufio.NewReader(resp.Body)
 
-	fmt.Println("response Status:", resp.Status)
+	log.Println("response Status:", resp.Status)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Error: %s", resp.Status)
+	}
 
+	ext := filepath.Ext(filename)
+	if ext != "" {
+		format = ext
+	}
+
+	fullFilename := genFilenameFromFormat(filename)
+	log.Println("Dump loaded")
+	log.Println("writing file:", fullFilename, "...")
 	writer := bufio.NewWriter(os.Stdout)
 	if filename != "" {
-		file, err := os.Create(extFilename(filename))
+		file, err := os.Create(fullFilename)
 		if err != nil {
 			return err
 		}
@@ -134,14 +156,16 @@ func Dump(cCtx *cli.Context) error {
 
 	io.Copy(writer, body)
 
+	log.Println("write completed")
+
 	return nil
 }
 
 func Restore(cCtx *cli.Context) error {
 
-	fmt.Println("host: ", host)
+	log.Println("host: ", host)
 
-	format = detectFormat(filename)
+	format = filepath.Ext(filename)
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -166,8 +190,11 @@ func Restore(cCtx *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("response Status:", resp.Status)
-
+	log.Println(resp.Status)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Error: %s", resp.Status)
+	}
+	log.Println("Restore completed")
 	return nil
 }
 
@@ -190,13 +217,16 @@ func Ping(cCtx *cli.Context) error {
 	return nil
 }
 
-func extFilename(filename string) string {
+func genFilenameFromFormat(filename string) string {
 	var ext string
-	if format == "tar" {
-		ext = "tar"
-	} else {
-		ext = "sql"
-	}
+	ext = "tar"
+	// if format == "tar" || format == "t" || format == "" {
+	// 	ext = "tar"
+	// } else if format == "plain" || format == "p" || format == "sql" {
+	// 	ext = "sql"
+	// } else {
+	// 	ext = "custom"
+	// }
 	if filename == "" {
 		filename = "dump." + ext
 	}
@@ -204,15 +234,4 @@ func extFilename(filename string) string {
 		filename = filename + "." + ext
 	}
 	return filename
-}
-
-func detectFormat(filename string) string {
-	ext := strings.Split(filename, ".")[len(strings.Split(filename, "."))-1]
-	if ext == "tar" {
-		return "tar"
-	}
-	if ext == "sql" || ext == "txt" {
-		return "plain"
-	}
-	return "custom"
 }

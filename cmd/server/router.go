@@ -53,7 +53,7 @@ func HealthCheck(c echo.Context) error {
 func DumpRoute(db db.Database, path string) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		c.Logger().Info("Dumping...")
-		dumpExec, err := db.Dump(path, "t")
+		dumpExec, err := db.Dump(path, "tar")
 		if err != nil {
 			return err
 		}

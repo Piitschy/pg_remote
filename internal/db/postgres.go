@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Piitschy/postgress-dump-tool/internal/utils"
 	"github.com/jackc/pgx/v5"
 
 	pg "github.com/habx/pg-commands"
@@ -92,7 +93,7 @@ func (db *Postgres) TestConnection() error {
 // Dump creates a dump of the database in the specified path
 // format can be "sql" or "tar" (or "p" or "t")
 func (db *Postgres) Dump(path string, format string) (pg.Result, error) {
-	format, err := formatFlag(format)
+	format, err := utils.FormatFlag(format)
 	if err != nil {
 		return pg.Result{}, err
 	}
@@ -101,7 +102,7 @@ func (db *Postgres) Dump(path string, format string) (pg.Result, error) {
 	}
 
 	now := time.Now().Format("2006-01-02T15:04:05")
-	filename := filepath.Join(path, "dump_"+now+"."+ext(format))
+	filename := filepath.Join(path, "dump_"+now+"."+utils.Ext(format))
 	dump, err := pg.NewDump(&db.Postgres)
 	if err != nil {
 		return pg.Result{}, err
@@ -122,7 +123,7 @@ func (db *Postgres) Restore(path string) error {
 	}
 
 	ext := filepath.Ext(path)
-	f, _ := formatFlag(ext)
+	f, _ := utils.FormatFlag(ext)
 	if f == "c" {
 		restore.Options = append(restore.Options, "-c", "-U", db.Username, "-d", db.DB)
 	} else {
@@ -143,33 +144,4 @@ func (db *Postgres) Restore(path string) error {
 	fmt.Println("Restore success")
 	fmt.Println(restoreExec.Output)
 	return nil
-}
-
-func ext(flag string) string {
-	if flag == "p" {
-		return "sql"
-	}
-	if flag == "t" {
-		return "tar"
-	}
-	if flag == "c" {
-		return ""
-	}
-	return ""
-}
-
-func formatFlag(ext string) (string, error) {
-	if strings.HasPrefix(ext, ".") {
-		ext = ext[1:]
-	}
-	if ext == "" || ext == "c" || ext == "custom" {
-		return "c", nil
-	}
-	if ext == "sql" || ext == "p" {
-		return "p", nil
-	}
-	if ext == "tar" || ext == "t" {
-		return "t", nil
-	}
-	return "p", fmt.Errorf("Invalid format %s", ext)
 }

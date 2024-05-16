@@ -2,11 +2,12 @@ package db_test
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/Piitschy/postgress-dump-tool/internal/db"
-	"github.com/testcontainers/testcontainers-go"
-	testpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/Piitschy/postgress-dump-tool/internal/testhelpers"
 )
 
 func TestNewPostgres(t *testing.T) {
@@ -52,26 +53,10 @@ func TestNewPostgresFromConnString(t *testing.T) {
 }
 
 func TestPostgresConnection(t *testing.T) {
-	data := map[string]string{
-		"db":       "postgres",
-		"username": "postgres",
-		"password": "password",
-	}
-
 	ctx := context.Background()
-
-	pgContainer, err := testpostgres.RunContainer(ctx,
-		testcontainers.WithImage("postgres:15.3-alpine"),
-		testpostgres.WithDatabase(data["db"]),
-		testpostgres.WithUsername(data["username"]),
-		testpostgres.WithPassword(data["password"]),
-		// testcontainers.WithWaitStrategy(
-		// 	wait.ForLog("database system is ready to accept connections").
-		// 		WithOccurrence(2).WithStartupTimeout(5*time.Second)),
-	)
-
+	pgContainer, err := testhelpers.CreatePostgresContainer(ctx)
 	if err != nil {
-		t.Errorf("error while creating testconatiner: Expected nil, got %s", err)
+		t.Errorf("error while container creation, got %s", err)
 	}
 
 	defer t.Cleanup(func() {
@@ -80,19 +65,113 @@ func TestPostgresConnection(t *testing.T) {
 		}
 	})
 
-	connStr, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
+	db, err := db.NewPostgresFromConnString(pgContainer.ConnectionString)
 	if err != nil {
-		t.Errorf("Expected nil, got %s", err)
-
-	}
-
-	db, err := db.NewPostgresFromConnString(connStr)
-	if err != nil {
-		t.Errorf("Expected nil, got %s", err)
+		t.Errorf("Expected nil while parsing connection string, got %s", err)
 	}
 
 	err = db.TestConnection()
 	if err != nil {
-		t.Errorf("Expected nil, got %s", err)
+		t.Errorf("Expected nil while testing connection to postgres, got %s", err)
+	}
+}
+
+func TestDump(t *testing.T) {
+	ctx := context.Background()
+	pgContainer, err := testhelpers.CreatePostgresContainer(ctx)
+	if err != nil {
+		t.Errorf("error while container creation, got %s", err)
+	}
+	defer t.Cleanup(func() {
+		if err := pgContainer.Terminate(ctx); err != nil {
+			t.Errorf("error while terminating testcontainer: Expected nil, got %s", err)
+		}
+	})
+
+	db, err := db.NewPostgresFromConnString(pgContainer.ConnectionString)
+	// db, err := db.NewPostgresFromConnString("postgres://pg:password@localhost:5432/database")
+	if err != nil {
+		t.Errorf("Expected nil while parsing connection string, got %s", err)
+	}
+
+	err = db.TestConnection()
+	if err != nil {
+		t.Errorf("Expected nil while testing connection to postgres, got %s", err)
+	}
+
+	// create folder for test dumps
+	dir := "./tmp"
+	err = os.Mkdir(dir, os.ModePerm)
+	if err != nil {
+		t.Log(err)
+	}
+	// Cleanup
+	defer func() {
+		err = os.RemoveAll(dir)
+		if err != nil {
+			t.Errorf("Expected nil while removing directory, got %s", err)
+		}
+	}()
+
+	_, err = db.Dump(dir, "t")
+	if err != nil {
+		t.Errorf("Expected nil while dumping table, got %s", err)
+	}
+}
+
+func TestDumpAndRestore(t *testing.T) {
+	ctx := context.Background()
+	pgContainerBase, err := testhelpers.CreatePostgresContainer(ctx)
+	pgContainerTarget, err := testhelpers.CreatePostgresContainer(ctx)
+	if err != nil {
+		t.Errorf("error while container creation, got %s", err)
+	}
+	defer t.Cleanup(func() {
+		if err := pgContainerBase.Terminate(ctx); err != nil {
+			t.Errorf("error while terminating testcontainer: Expected nil, got %s", err)
+		}
+		if err := pgContainerTarget.Terminate(ctx); err != nil {
+			t.Errorf("error while terminating testcontainer: Expected nil, got %s", err)
+		}
+	})
+
+	dbBase, err := db.NewPostgresFromConnString(pgContainerBase.ConnectionString)
+	dbTarget, err := db.NewPostgresFromConnString(pgContainerBase.ConnectionString)
+	if err != nil {
+		t.Errorf("Expected nil while parsing connection string, got %s", err)
+	}
+	_, _, err = pgContainerTarget.Exec(ctx, []string{"psql", "-U", dbTarget.Username, "-d", dbTarget.DB, "-c", fmt.Sprintf("DROP DATABASE %s;", dbTarget.DB)})
+	if err != nil {
+		t.Errorf("error while dropping target database, got %s", err)
+	}
+	// db, err := db.NewPostgresFromConnString("postgres://pg:password@localhost:5432/database")
+
+	err = dbBase.TestConnection()
+	if err != nil {
+		t.Errorf("Expected nil while testing connection to postgres, got %s", err)
+	}
+
+	// create folder for test dumps
+	dir := "./tmp"
+	err = os.Mkdir(dir, os.ModePerm)
+	if err != nil {
+		t.Log(err)
+	}
+	// Cleanup
+	defer func() {
+		err = os.RemoveAll(dir)
+		if err != nil {
+			t.Errorf("Expected nil while removing directory, got %s", err)
+		}
+	}()
+
+	dump, err := dbBase.Dump(dir, "t")
+	if err != nil {
+		t.Errorf("Expected nil while dumping table, got %s", err)
+	}
+
+	err = dbTarget.Restore(dump.File)
+	if err != nil {
+		t.Errorf("Expected nil while restoring dump, got %s", err)
 	}
 }

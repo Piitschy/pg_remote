@@ -3,6 +3,6 @@ package db
 import pg "github.com/habx/pg-commands"
 
 type Database interface {
-	Dump(format string) pg.Result
+	Dump(path, format string) (pg.Result, error)
 	Restore(path string) error
 }

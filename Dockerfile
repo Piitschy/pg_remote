@@ -1,11 +1,7 @@
 # syntax=docker/dockerfile:1
 
 FROM golang:1.22-alpine AS build-stage
-
-RUN apk add postgresql
-
 WORKDIR /app
-
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
@@ -19,6 +15,7 @@ FROM build-stagen AS test-stage
 RUN go test ./...
 
 FROM alpine AS production-stage
+RUN apk add postgresql
 WORKDIR /
 COPY --from=build-stage /server /server
 RUN chmod +x /server

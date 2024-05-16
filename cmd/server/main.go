@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -49,9 +51,15 @@ func main() {
 		},
 	})
 
+	dir := dumpDir()
+	err := os.Mkdir(dir, os.ModePerm)
+	if err != nil {
+		panic(fmt.Sprintf("Could not create dumps directory: %s", err))
+	}
+
 	// Routes
 	e.GET("/", HealthCheck, keyAuth)
-	e.POST("/dump", DumpRoute(db), keyAuth)
+	e.POST("/dump", DumpRoute(db, dir), keyAuth)
 	e.POST("/restore", RestoreRoute(db), keyAuth)
 	e.GET("/docs", func(c echo.Context) error {
 		return c.Redirect(301, "/docs/index.html")
@@ -60,4 +68,12 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+func dumpDir() string {
+	dir := os.Getenv("DUMP_DIR")
+	if dir == "" {
+		dir = filepath.Join(".", "dumps")
+	}
+	return dir
 }

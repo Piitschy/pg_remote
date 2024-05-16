@@ -37,7 +37,7 @@ services:
 
   backup:
     restart: always
-    build: ../cmd/server
+    build: ../.
     networks:
       - directus
     ports:

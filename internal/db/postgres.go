@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -89,38 +89,50 @@ func (db *Postgres) TestConnection() error {
 	return nil
 }
 
-func (db *Postgres) Dump(format string) pg.Result {
-	if format == "" {
-		format = "t"
+// Dump creates a dump of the database in the specified path
+// format can be "sql" or "tar" (or "p" or "t")
+func (db *Postgres) Dump(path string, format string) (pg.Result, error) {
+	format, err := formatFlag(format)
+	if err != nil {
+		return pg.Result{}, err
 	}
-	if format != "t" && format != "p" {
-		log.Fatal("Format must be t or p")
+	if strings.HasSuffix(path, "/") {
+		path = path[:len(path)-1]
 	}
+
 	now := time.Now().Format("2006-01-02T15:04:05")
-	filename := "dump_" + now + "." + ext(format)
+	filename := filepath.Join(path, "dump_"+now+"."+ext(format))
 	dump, err := pg.NewDump(&db.Postgres)
 	if err != nil {
-		panic(err)
+		return pg.Result{}, err
 	}
 	dump.SetFileName(filename)
 	dump.SetupFormat(format)
 	dumpExec := dump.Exec(pg.ExecOptions{StreamPrint: false})
 	if dumpExec.Error != nil {
-		fmt.Println(dumpExec.Error.Err)
-		fmt.Println(dumpExec.Output)
+		return dumpExec, dumpExec.Error.Err
 	}
-	fmt.Println(dumpExec.Output)
-	fmt.Println("Dump success")
-	return dumpExec
+	return dumpExec, nil
 }
 
 func (db *Postgres) Restore(path string) error {
 	restore, err := pg.NewRestore(&db.Postgres)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	restore.Options = append(restore.Options, "-Ft")
+	ext := filepath.Ext(path)
+	f, _ := formatFlag(ext)
+	if f == "c" {
+		restore.Options = append(restore.Options, "-c", "-U", db.Username, "-d", db.DB)
+	} else {
+		restore.Options = append(restore.Options, "-x", "-F"+f)
+		restore.Options = append(restore.Options, "-d", db.DB)
+	}
+
+	if restore.Role == "" && restore.Username != "" {
+		restore.Role = db.Username
+	}
 
 	restoreExec := restore.Exec(path, pg.ExecOptions{StreamPrint: false})
 	if restoreExec.Error != nil {
@@ -133,9 +145,31 @@ func (db *Postgres) Restore(path string) error {
 	return nil
 }
 
-func ext(format string) string {
-	if format == "p" {
+func ext(flag string) string {
+	if flag == "p" {
 		return "sql"
 	}
-	return "tar"
+	if flag == "t" {
+		return "tar"
+	}
+	if flag == "c" {
+		return ""
+	}
+	return ""
+}
+
+func formatFlag(ext string) (string, error) {
+	if strings.HasPrefix(ext, ".") {
+		ext = ext[1:]
+	}
+	if ext == "" || ext == "c" || ext == "custom" {
+		return "c", nil
+	}
+	if ext == "sql" || ext == "p" {
+		return "p", nil
+	}
+	if ext == "tar" || ext == "t" {
+		return "t", nil
+	}
+	return "p", fmt.Errorf("Invalid format %s", ext)
 }

@@ -50,10 +50,15 @@ func HealthCheck(c echo.Context) error {
 //dumpRequest := new(DumpRequest)
 //c.Bind(dumpRequest)
 */
-func DumpRoute(db db.Database) func(c echo.Context) error {
+func DumpRoute(db db.Database, path string) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		c.Logger().Info("Dumping...")
-		dumpExec := db.Dump("t")
+		dumpExec, err := db.Dump(path, "t")
+		if err != nil {
+			return err
+		}
+		c.Logger().Info(dumpExec.Output)
+		c.Logger().Info("Dump success")
 		c.Logger().Info(dumpExec.File)
 		return c.File(dumpExec.File)
 	}

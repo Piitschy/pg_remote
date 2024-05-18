@@ -4,11 +4,11 @@
 
 ### CLI
 ```bash
-go install github.com/Piitschy/pgrd/cmd/pgrd@0.3.0
+go install github.com/Piitschy/pgrd/cmd/pgrd@0.3.1
 ```
 ### Server side componente
 ```bash
-docker pull piitschy/pgrd:0.3.0
+docker pull piitschy/pgrd:0.3.1
 ```
 
 ## Server

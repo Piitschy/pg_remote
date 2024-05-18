@@ -38,7 +38,7 @@ services:
 
   backup:
     restart: always
-    build: ../.
+    image: piitschy/pgrd:0.3.0
     networks:
       - directus
     ports:

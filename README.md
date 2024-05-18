@@ -4,7 +4,7 @@
 
 ### CLI
 ```bash
-go install github.com/Piitschy/pgrd/cmd/pgrd
+go install github.com/Piitschy/pgrd/cmd/pgrd@0.3.0
 ```
 ### Server side componente
 ```bash

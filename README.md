@@ -1,5 +1,11 @@
 # postgress-dump-tool
- 
+
+## Installation
+
+```bash
+go install github.com/Piitschy/postgress-dump-tool/cmd/pgrd
+```
+
 ## Server
 
 Lad den Server einfach in deinen Docker-Stack neben einer Postgress-Istanz - über das Environment kannst du alle wichtigen Konfigurationen angeben.
@@ -13,23 +19,21 @@ Die CLI nutzt den offenen Port, um mit http-Methoden Daten zu transferieren.
 ### dump
 
 ```bash
-pg_remote -H <host> -p <post> -k <Key> dump -f <format 'tar'|'plain'> -o <filename>
+pgrd --host <host> -p <post> -k <Key> dump -o <filename>
 ```
-oder
 
+### local dump 
 ```bash
-pg_remote -H <host> -p <post> -k <Key> dump -f plain > dump.sql
+pgrd -u <db-user> --pw <db-password> --db <database> -p <post> ldump -o <filename>
 ```
 
 ### restore
 
-Beim Restoring wird immer auch ein Dump erzeugt.
-
 ```bash
-pg_remote -H <host> -p <post> -k <Key> restore -o <filename>
+pgrd --host <host> -p <post> -k <Key> restore -i <filename>
 ```
-oder
 
+### local restore 
 ```bash
-pg_remote -H <host> -p <post> -k <Key> restore < dump.sql
+pgrd -u <db-user> --pw <db-password> --db <database> -p <post> lrestore -o <filename>
 ```

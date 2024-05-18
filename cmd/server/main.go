@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	db "github.com/Piitschy/postgress-dump-tool/internal/db"
@@ -43,6 +45,7 @@ func main() {
 
 	// Middleware
 	e.Use(middleware.Logger())
+	e.Logger.SetLevel(logLevelFromEnv())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -81,4 +84,20 @@ func dumpDir() string {
 		dir = filepath.Join(".", "dumps")
 	}
 	return dir
+}
+
+func logLevelFromEnv() log.Lvl {
+	ll := os.Getenv("LOG_LEVEL")
+	switch strings.ToUpper(ll) {
+	case "DEBUG":
+		return log.DEBUG
+	case "INFO":
+		return log.INFO
+	case "WARN":
+		return log.WARN
+	case "ERROR":
+		return log.ERROR
+	default:
+		return log.WARN
+	}
 }

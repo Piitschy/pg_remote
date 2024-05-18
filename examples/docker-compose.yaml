@@ -4,6 +4,8 @@ services:
   database:
     restart: always
     image: 'postgis/postgis:15-master'
+    ports:
+      - '5432:5432'
     networks:
       - directus
     environment:
@@ -48,7 +50,7 @@ services:
       DB_DATABASE: directus
       DB_USER: directus
       DB_PASSWORD: directus
-
+      LOG_LEVEL: debug
 
 networks:
   directus:

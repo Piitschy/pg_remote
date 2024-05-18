@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Piitschy/postgress-dump-tool/internal/utils"
+	"github.com/Piitschy/pgrd/internal/utils"
 	"github.com/jackc/pgx/v5"
 
 	pg "github.com/habx/pg-commands"

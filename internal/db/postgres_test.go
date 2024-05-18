@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Piitschy/postgress-dump-tool/internal/db"
-	"github.com/Piitschy/postgress-dump-tool/internal/testhelpers"
+	"github.com/Piitschy/pgrd/internal/db"
+	"github.com/Piitschy/pgrd/internal/testhelpers"
 )
 
 func TestNewPostgres(t *testing.T) {

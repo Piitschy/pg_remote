@@ -10,7 +10,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Piitschy/postgress-dump-tool/internal/db"
+	"github.com/Piitschy/pgrd/internal/db"
 	"github.com/urfave/cli/v2"
 )
 

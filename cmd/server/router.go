@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	db "github.com/Piitschy/postgress-dump-tool/internal/db"
+	db "github.com/Piitschy/pgrd/internal/db"
 	"github.com/labstack/echo/v4"
 )
 

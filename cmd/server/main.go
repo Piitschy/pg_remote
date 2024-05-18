@@ -12,8 +12,8 @@ import (
 	"github.com/labstack/gommon/log"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	db "github.com/Piitschy/postgress-dump-tool/internal/db"
-	_ "github.com/Piitschy/postgress-dump-tool/server/docs"
+	_ "github.com/Piitschy/pgrd/cmd/server/docs"
+	db "github.com/Piitschy/pgrd/internal/db"
 )
 
 // @title Echo Swagger Example API

@@ -1,9 +1,14 @@
-# postgress-dump-tool
+# pgrd
 
 ## Installation
 
+### CLI
 ```bash
-go install github.com/Piitschy/postgress-dump-tool/cmd/pgrd
+go install github.com/Piitschy/pgrd/cmd/pgrd
+```
+### Server side componente
+```bash
+docker pull piitschy/pgrd
 ```
 
 ## Server

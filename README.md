@@ -8,7 +8,7 @@ go install github.com/Piitschy/pgrd/cmd/pgrd
 ```
 ### Server side componente
 ```bash
-docker pull piitschy/pgrd
+docker pull piitschy/pgrd:0.3.0
 ```
 
 ## Server

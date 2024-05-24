@@ -17,12 +17,14 @@ func main() {
 				Aliases: []string{"H"},
 				Value:   "localhost",
 				Usage:   "Host to connect to the database",
+				EnvVars: []string{"PGRD_HOST"},
 			},
 			&cli.StringFlag{
 				Name:    "port",
 				Aliases: []string{"P", "p"},
 				Value:   "5432",
 				Usage:   "Port to connect to the database",
+				EnvVars: []string{"PGRD_PORT"},
 			},
 
 			&cli.StringFlag{
@@ -30,6 +32,7 @@ func main() {
 				Aliases: []string{"k", "K"},
 				Value:   "",
 				Usage:   "Path the key from the environment variable KEY",
+				EnvVars: []string{"PGRD_KEY"},
 			},
 
 			&cli.StringFlag{
@@ -37,18 +40,21 @@ func main() {
 				Aliases: []string{"u"},
 				Value:   "",
 				Usage:   "Local database user",
+				EnvVars: []string{"PGRD_LOCAL_DB_USER"},
 			},
 			&cli.StringFlag{
 				Name:    "localdb-password",
 				Aliases: []string{"pw"},
 				Value:   "",
 				Usage:   "Local database password",
+				EnvVars: []string{"PGRD_LOCAL_DB_PASSWORD"},
 			},
 			&cli.StringFlag{
 				Name:    "localdb-name",
 				Aliases: []string{"db"},
 				Value:   "",
 				Usage:   "Local database name",
+				EnvVars: []string{"PGRD_LOCAL_DB_NAME"},
 			},
 		},
 		Commands: []*cli.Command{
@@ -66,10 +72,11 @@ func main() {
 					// 	Destination: &format,
 					// },
 					&cli.StringFlag{
-						Name:    "output-file",
-						Aliases: []string{"o"},
-						Value:   "dump.tar",
-						Usage:   "output file `NAME`",
+						Name:      "output-file",
+						Aliases:   []string{"o"},
+						Value:     "dump.tar",
+						Usage:     "output file `NAME`",
+						TakesFile: true,
 					},
 				},
 			},
@@ -81,10 +88,11 @@ func main() {
 				Action: Restore,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "input-file",
-						Aliases: []string{"i"},
-						Value:   "dump",
-						Usage:   "input file `NAME`",
+						Name:      "input-file",
+						Aliases:   []string{"i"},
+						Value:     "dump",
+						Usage:     "input file `NAME`",
+						TakesFile: true,
 					},
 				},
 			},
@@ -95,10 +103,11 @@ func main() {
 				Action:  LocalDump,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "output-file",
-						Aliases: []string{"o"},
-						Value:   "dump.tar",
-						Usage:   "output file `NAME`",
+						Name:      "output-file",
+						Aliases:   []string{"o"},
+						Value:     "dump.tar",
+						Usage:     "output file `NAME`",
+						TakesFile: true,
 					},
 				},
 			},
@@ -109,10 +118,11 @@ func main() {
 				Action:  LocalRestore,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "input-file",
-						Aliases: []string{"i"},
-						Value:   "dump",
-						Usage:   "input file `NAME`",
+						Name:      "input-file",
+						Aliases:   []string{"i"},
+						Value:     "dump",
+						Usage:     "input file `NAME`",
+						TakesFile: true,
 					},
 				},
 			},

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -17,65 +16,26 @@ type Config struct {
 }
 
 func NewConfigFromContextOrEnv(cCtx *cli.Context) *Config {
-	envhost := os.Getenv("PGRD_HOST")
-	envport := os.Getenv("PGRD_PORT")
-	envkey := os.Getenv("PGRD_KEY")
-	envdbuser := os.Getenv("PGRD_LOCAL_DB_USER")
-	envdbpassword := os.Getenv("PGRD_LOCAL_DB_PASSWORD")
-	envdbname := os.Getenv("PGRD_LOCAL_DB_NAME")
-
-	c := &Config{}
-	if cCtx.String("host") != "" {
-		c.host = cCtx.String("host")
-	} else if envhost != "" {
-		c.host = envhost
-	} else {
-		c.host = "localhost"
+	c := &Config{
+		host:       cCtx.String("host"),
+		port:       cCtx.String("port"),
+		key:        cCtx.String("key"),
+		dbUser:     nil,
+		dbPassword: nil,
+		dbName:     nil,
 	}
-
-	if cCtx.String("port") != "" {
-		c.port = cCtx.String("port")
-	} else if envport != "" {
-		c.port = envport
-	} else {
-		c.port = "5432"
-	}
-
-	if cCtx.String("key") != "" {
-		c.key = cCtx.String("key")
-	} else if envkey != "" {
-		c.key = envkey
-	} else {
-		c.key = ""
-	}
-
 	if cCtx.String("localdb-user") != "" {
-		dbUser := cCtx.String("localdb-user")
-		c.dbUser = &dbUser
-	} else if envdbuser != "" {
-		c.dbUser = &envdbuser
-	} else {
-		c.dbUser = nil
+		u := cCtx.String("localdb-user")
+		c.dbUser = &u
 	}
-
 	if cCtx.String("localdb-password") != "" {
-		dbPassword := cCtx.String("localdb-password")
-		c.dbPassword = &dbPassword
-	} else if envdbpassword != "" {
-		c.dbPassword = &envdbpassword
-	} else {
-		c.dbPassword = nil
+		pw := cCtx.String("localdb-password")
+		c.dbPassword = &pw
 	}
-
 	if cCtx.String("localdb-name") != "" {
-		dbName := cCtx.String("localdb-name")
-		c.dbName = &dbName
-	} else if envdbname != "" {
-		c.dbName = &envdbname
-	} else {
-		c.dbName = nil
+		n := cCtx.String("localdb-name")
+		c.dbName = &n
 	}
-
 	return c
 
 }

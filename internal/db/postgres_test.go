@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/Piitschy/pgrd/internal/db"
-	"github.com/Piitschy/pgrd/internal/testhelpers"
+	"github.com/Piitschy/pgrd/test/testhelpers"
 )
 
 func TestNewPostgres(t *testing.T) {

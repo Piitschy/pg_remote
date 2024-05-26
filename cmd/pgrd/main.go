@@ -10,7 +10,7 @@ import (
 func main() {
 	app := &cli.App{
 		Name:  "pgrd",
-		Usage: "pgrd (postgres remote dump) is a tool for managing remote postgres based databases.\nIt allows you to dump and restore databases remotely.\n\nFor example:\npgrd -H localhost -p 5432 -k yourservice dump -o dump.tar",
+		Usage: "pgrd (postgres remote dump) is a tool for managing remote postgres based databases.\nIt allows you to dump and restore databases remotely.\n\nFor example:\npgrd -H localhost -p 5432 -k yoursecret dump -o dump.tar",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "host",

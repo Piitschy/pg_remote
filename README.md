@@ -4,41 +4,41 @@
 
 ### CLI
 ```bash
-go install github.com/Piitschy/pgrd/cmd/pgrd@0.3.1
+go install github.com/Piitschy/pgrd/cmd/pgrd@latest
 ```
-### Server side componente
+### Server side component
 ```bash
 docker pull piitschy/pgrd:0.3.1
 ```
 
 ## Server
 
-Lad den Server einfach in deinen Docker-Stack neben einer Postgress-Istanz - über das Environment kannst du alle wichtigen Konfigurationen angeben.
+Simply add the server to your Docker stack alongside a Postgres instance - you can specify all important configurations through the environment.
 
-Dabei muss ein Port auf 3000 exposed werden.
+A port must be exposed on 3000.
 
 ## CLI
 
-Die CLI nutzt den offenen Port, um mit http-Methoden Daten zu transferieren.
+The CLI uses the open port to transfer data with HTTP methods.
 
 ### dump
 
 ```bash
-pgrd --host <host> -p <post> -k <Key> dump -o <filename>
+pgrd --host <host> -p <port> -k <key> dump -o <filename>
 ```
 
 ### local dump 
 ```bash
-pgrd -u <db-user> --pw <db-password> --db <database> -p <post> ldump -o <filename>
+pgrd -u <db-user> --pw <db-password> --db <database> -p <port> ldump -o <filename>
 ```
 
 ### restore
 
 ```bash
-pgrd --host <host> -p <post> -k <Key> restore -i <filename>
+pgrd --host <host> -p <port> -k <key> restore -i <filename>
 ```
 
 ### local restore 
 ```bash
-pgrd -u <db-user> --pw <db-password> --db <database> -p <post> lrestore -o <filename>
+pgrd -u <db-user> --pw <db-password> --db <database> -p <port> lrestore -i <filename>
 ```
